@@ -66,7 +66,7 @@ class FS{
   char leerCaracter(int I, int J);
   void escribirCaracter(int I, int J, char caracter);
   int unidadSize();
-  
+  std::string leerPadron(std::string nombre, Usuario* user);
 
  private:
   void imprimirMatriz();
@@ -412,6 +412,62 @@ void FS::escribirCaracter(int I, int J, char caracter) {
 
 int unidadSize() {
   return SIZE_UNIDAD;
+}
+
+std::string FS::leerPadron(std::string nombre, Usuario* user){
+  if (verificador->verificarPermisos(user, "0700", 2)) {
+    int posicionDirectorio;
+    //Busca la entrada del directorio
+    for(int i = 0; i < directorio.size(); i++){
+        if(directorio[i].nombre == nombre){
+            posicionDirectorio = i;
+        }
+    }
+    //Guardo todos los bloques que utiliza el archivo en un vector
+    std::vector<int> bloquesUsados;
+    int bloqueActual = directorio[posicionDirectorio].bloque;
+    while(bloqueActual != -1){
+        bloquesUsados.push_back(bloqueActual);
+        bloqueActual = FAT[bloqueActual];
+    }
+    std::string lectura = "";
+    //Recorro todos los bloques utilizados por el archivo
+    for(int bloque : bloquesUsados){
+        int inicioBloque = bloque*128;
+        int finalBloque = ((bloque+1)*128);
+        int fila = 0;
+        int columna = 0;
+        int contador = 0;
+        //Obtengo la posición inicial del bloque en la unidad
+        while(contador < inicioBloque){
+            if(columna == SIZE_UNIDAD){
+                columna = 0;
+                fila++;
+            } else {
+                columna++;
+                contador++;
+            }
+        }
+        for(int index = inicioBloque; index < finalBloque; index++){
+            if(columna == SIZE_UNIDAD){
+                columna = 0;
+                fila++;
+            } else {
+                if(unidad[fila][columna] == '$'){
+                    lectura += "\n";
+                    break;
+                } else {
+                    lectura += unidad[fila][columna];
+                    columna++;
+                }
+            }
+        }
+    }
+    return lectura;
+  } else {
+    std::cout << "No tiene permisos para esta acción" << std::endl;
+  }
+  return "";
 }
 
 #endif
