@@ -1,5 +1,6 @@
-#include "FS.h"
-#include "Usuario.h"
+#include "FS.hpp"
+#include "Usuario.hpp"
+#include "Empadronador.hpp"
 #include <string>
 #include <iostream>
 

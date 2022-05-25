@@ -1,11 +1,10 @@
-#ifndef VERIFICADOR_H
-#define VERIFICADOR_H
+#ifndef VERIFICADOR_HPP
+#define VERIFICADOR_HPP
 
-#include "FS.h"
 #include <iostream>
 #include <string>
 
-#include "Usuario.h"
+#include "Usuario.hpp"
 
 class Verificador {
  public:

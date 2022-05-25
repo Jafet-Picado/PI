@@ -1,7 +1,7 @@
 // #pragma once
 
-#ifndef USUARIO_H
-#define USUARIO_H
+#ifndef USUARIO_HPP
+#define USUARIO_HPP
 
 #include <iostream>
 #include <string>

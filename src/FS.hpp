@@ -1,5 +1,5 @@
-#ifndef FS_H
-#define FS_H
+#ifndef FS_HPP
+#define FS_HPP
 
 #include <stdio.h>
 #include <iostream>
@@ -10,8 +10,8 @@
 #include <ctime>
 #include <chrono>
 
-#include "Usuario.h"
-#include "Verificador.h"
+#include "Usuario.hpp"
+#include "Verificador.hpp"
 
 #define SIZE_UNIDAD 8  //Tamano de cada vector de la matriz unidad
 
@@ -29,6 +29,11 @@ struct entradaDirectorio{
   bool isDirectory = false;
 };
 
+struct voto{
+  std::string ID;
+  int voto;
+};
+
 class FS{
   // vars
  private:
@@ -40,6 +45,7 @@ class FS{
   int posicionActual = 0;
   std::fstream archivo;
   Verificador* verificador;
+
   // methods
  public: 
   FS();
@@ -56,6 +62,11 @@ class FS{
   void eliminar(std::string nombre, Usuario *user);
   void cerrar(std::string nombre, Usuario *user);
   void imprimirArchivo(std::string, Usuario *user);
+
+  char leerCaracter(int I, int J);
+  void escribirCaracter(int I, int J, char caracter);
+  int unidadSize();
+  
 
  private:
   void imprimirMatriz();
@@ -389,6 +400,18 @@ void FS::cerrar(std::string nombre, Usuario *user) {
 
 void FS::imprimirArchivo(std::string nombre, Usuario *user) {
   std::cout << this->leer(nombre, user) << std::endl;
+}
+
+char FS::leerCaracter(int I, int J) {
+  return unidad[I][J];
+}
+
+void FS::escribirCaracter(int I, int J, char caracter) {
+  unidad[I][J] = caracter;
+}
+
+int unidadSize() {
+  return SIZE_UNIDAD;
 }
 
 #endif
