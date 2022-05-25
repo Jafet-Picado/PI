@@ -13,10 +13,10 @@
 #include "Usuario.hpp"
 #include "Verificador.hpp"
 
-#define SIZE_UNIDAD 8  //Tamano de cada vector de la matriz unidad
+#define SIZE_UNIDAD 128  //Tamano de cada vector de la matriz unidad
 
 //Restriccion: bloque debe ser potencia de 2 y menor que SIZE_UNIDAD.
-#define SIZE_BLOQUE 4  //Tamano de cada bloque de la unidad
+#define SIZE_BLOQUE 128  //Tamano de cada bloque de la unidad
 
 struct entradaDirectorio{
   int bloque = -1;

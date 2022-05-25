@@ -1,0 +1,4 @@
+CA-Paraiso.txt
+PU-BuenosAires.txt
+SJ-Central.txt
+SJ-Curridabat.txt

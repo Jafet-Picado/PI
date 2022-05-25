@@ -5,7 +5,6 @@
 #include <fstream>
 #include <vector>
 #include <string>
-#include <filesystem>
 
 #include "FS.hpp"
 
@@ -36,27 +35,29 @@ Empadronador::Empadronador() {
 // @return true si se carga exitosamente todo el contenido de la carpeta y si alguno falla devuelve false
 bool Empadronador::cargarPadron(FS *fs, Usuario *user) {
   int contador = 0;
-	std::fstream archivo;
-  std::string nombre; // nombre del archivo en directorio
-  std::string path = "./Padron/"; // El path en donde están ubicados los archivos
+  std::fstream lista;
+  std::string nombrePadron; // Nombre del archivo a leer y a crear
+  std::fstream archivo;
   std::string linea;
-  for (const auto& it : std::filesystem::directory_iterator(path)) { // Recorre el path y "it" tiene el nombre de un archivo
-    nombre = it.path().string(); // Guarda el path a un archivo de la carpeta como un string
-    archivo.open(nombre);
-    if (archivo.is_open()) {
-			nombre.erase(0, nombre.rfind("/")+1); // Guarda solo el nombre para meterlo a la unidad
-			fs->crear(nombre, user);
-			while (getline(archivo, linea)) {
-      fs->agregar(nombre, linea, user);
-      fs->agregar(nombre, "$", user); // Esto internamente significa \n EOL
-    	}
-    	archivo.close();
-			contador++;
-		} else {
-			std::cout << "\033[31mNo se pudo cargar el archivo " << nombre << std::endl;
-			return false;
-		}
+  lista.open("./Padron/ListaPadrones.txt");
+  if (lista.is_open()) {
+    while (getline(lista, nombrePadron)) { // Recorre el path y "it" tiene el nombre de un archivo
+      archivo.open("./Padron/" + nombrePadron);
+      if (archivo.is_open()) {
+        fs->crear(nombrePadron, user);
+        while (getline(archivo, linea)) {
+        fs->agregar(nombrePadron, linea, user);
+        fs->agregar(nombrePadron, "$", user); // Esto internamente significa \n EOL
+        }
+        archivo.close();
+        ++contador;
+      } else {
+        std::cout << "\033[31mNo se pudo cargar el archivo " << nombrePadron << std::endl;
+        return false;
+      }
+    }
   }
+  
 	if (contador > 0) {
 		std::cout << "\033[32mSe cargaron correctamente " << contador << " archivos al padron\033[0m" << std::endl;
 		return true;

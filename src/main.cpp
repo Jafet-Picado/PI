@@ -15,19 +15,9 @@
 int main() {
   FS* fs = new FS();
   Usuario* user = new Usuario(1);
-  fs->crear("a.txt", user);
-  //fs->agregar("a.txt", "Hola profe", user);
-  fs->escribir("a.txt", "Hola profe", 0, user);
-  fs->agregar("a.txt", " como esta", user);
-  fs->agregar("a.txt", " bien y usted", user);
-  /*s
-  fs->crear("b.txt", user);
-  fs->agregar("b.txt", "Espero que este bien el trabajo", user);
-  fs->imprimirUnidad(1);
-  fs->eliminar("a.txt", user);
-  std::cout << fs->leer("b.txt", user) << std::endl;
-  */
-  fs->imprimirUnidad(1);
+  Empadronador empadronador;
+  empadronador.cargarPadron(fs, user);
+  fs->imprimirUnidad();
 }
 
 /*  IMPRIMIR UNIDAD al final
