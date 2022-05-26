@@ -1,6 +1,9 @@
 #ifndef EMPADRONADOR_HPP
 #define EMPADRONADOR_HPP
 
+#include <cstring>
+#include <stdlib.h>
+#include <time.h>
 #include <algorithm>
 #include <iostream>
 #include <fstream>
@@ -71,69 +74,79 @@ bool Empadronador::cargarPadron(FS* fs, Usuario *user) {
 // @brief Simula la llegada de votos en el sistema y como se cargan a la unidad
 // @param *fs el filesystem con el padrón
 void Empadronador::simularVotos(FS *fs, Usuario *user) {
+	srand(time(NULL));
 	std::fstream archivo;
 	std::string linea;
 	std::string padron;
 	std::string datos;
-	archivo.open("../Votantes.txt");
-	if (archivo.is_open()) {
-		while (getline(archivo, linea)) {
-			padron = linea.substr(0, linea.find(" "));
-			std::cout << padron << std::endl;
-			linea.erase(0, linea.rfind(" ")+1); // linea ahora contiene los datos de la persona que votó
-			std::cout << linea << std::endl;
-			actualizarPadron(fs, padron, linea, user);
-			// Digamos que aquí se vota y después se encripta el voto. bla bla bla
+	int contador = 0;
+	archivo.open("../Padron/Partido.txt");
+	std::string partidos;
+  	if(archivo.is_open()){
+		while(getline(archivo, linea)){
+			partidos += linea+" ";
 		}
 		archivo.close();
-    // De aquí en adelante simula que llegaron N votos en un paquete para subir a la unidad
-		archivo.open("../Votos.txt");
-		std::string votos = "";
+		fs->crear("Partidos.txt", user);
+		fs->agregar("Partidos.txt", partidos, user);
+		archivo.open("../Votantes.txt");
 		if (archivo.is_open()) {
 			while (getline(archivo, linea)) {
-				almacenVotos.push_back(stoi(linea));
+				padron = linea.substr(0, linea.find(" "));
+				linea.erase(0, linea.rfind(" ")+1); // linea ahora contiene los datos de la persona que votó
+				actualizarPadron(fs, padron, linea, user);
+				contador++;
+				// Digamos que aquí se vota y después se encripta el voto. bla bla bla
 			}
+			archivo.close();
+		// De aquí en adelante simula que llegaron N votos en un paquete para subir a la unidad
+			std::vector<int> votos;
+			for(int i = 0; i < 15; i++){
+				votos.push_back(1+rand()%5);
+			}
+			subirVotos(fs, votos, user);
 		} else {
-			std::cout << "\033[31mNo se pudo abrir el archivo Votos.txt" << std::endl;
+			std::cout << "\033[31mNo se pudo abrir el archivo Votantes.txt" << std::endl;
 		}
 	} else {
-		std::cout << "\033[31mNo se pudo abrir el archivo Votantes.txt" << std::endl;
-	}
+        std::cout << "\033[31mNo se pudo cargar el archivo Partido.txt" << std::endl;
+  	}
 }
 
 // @brief Actualiza el valor que indica si una persona votó o no en el padrón, le asigna 1 si ya votó
-// @param *fs el filesystem en donde está el padrón
+// @param fs el filesystem en donde está el padrón
 // @param padron es el nombre del archivo en donde se ubica el nombre de la persona a actualizar
 // @param datos, contiene "nombre1 nombre2 apellido1 apellido2 cédula" de la persona que votó
 // @return Devuelve true si logró encontrar a la persona y actualizó el valor en el padrón, false si no
-bool Empadronador::actualizarPadron(FS *fs, std::string padron, std::string datos, Usuario *user) {
-	
+bool Empadronador::actualizarPadron(FS* fs, std::string padron, std::string datos, Usuario* user) {
+
   // Elimina los nombres de datos, deja solamente la cedula
-  int tamano_de_datos = datos.size();  
+  int tamano_de_datos = datos.size();
   for (int i = 0; i < (tamano_de_datos - 9); i++) {
     datos.erase(datos.begin());
   }
 
   // Recorre la unidad
   int size = unidadSize();
-  for (int i = 0; i < size*size; i++) {
+  int calc = size*size;
+  for (int i = 0; i < calc; i++) {
     // Los digitos de la unidad siempre pertenecen a la cedula
-    if (isdigit(fs->leerCaracter((i-(i%40))/40, i%40 /* esta aritmetica complicada simplemente itera la unidad */))) {
+    if (isdigit(fs->leerCaracter((i-(i%size))/size, i%size /* esta aritmetica complicada simplemente itera la unidad */))) {
       std::string cedula = "";
       for (int j = 0; j < 9; j++) {
-        cedula += fs->leerCaracter((i-(i%40))/40, i%40);
+        cedula += fs->leerCaracter((i-(i%size))/size, i%size);
         i++;
       }
       i++;
       // Compara la cedula actual con la que se ensta buscando
       if (datos.compare(cedula) == 0) {
         // Actualiza el valor del caracter
-        fs->escribirCaracter((i-(i%40))/40, i%40, '1');
+        fs->escribirCaracter((i-(i%size))/size, i%size, '1');
         return true;
       }
     }
   }
-	return false;
+  return false;
 }
 
 // @brief Carga en la unidad los N votos que lleguen en el paquete (vector)
@@ -149,14 +162,27 @@ void Empadronador::subirVotos(FS *fs, std::vector<int> votos, Usuario* user) {
 
 std::string Empadronador::contarVotos(FS* fs, Usuario* user){
 	std::string votos = "";
-	fs->abrir("votos.txt",user);
 	std::string aux = fs->leer("votos.txt",user);
-	std::cout<<"Prueba leer: "<<aux<<std::endl;
+	
 	std::vector<char> partidos;
 	for(char x : aux){
 		if (!(std::find(partidos.begin(), partidos.end(), x) != partidos.end())) {
-			partidos.push_back(x);	
+			if(isdigit(x)){
+				partidos.push_back(x);	
+			}
 		}
+	}
+	std::string conteo = fs->leer("Partido.txt", user);
+	std::vector<std::string> resultado;
+	std::cout<<conteo<<std::endl;
+	std::string delim = " ";
+    while (!conteo.empty()) {
+		std::cout<<"Entra"<<std::endl;
+        resultado.push_back(conteo.substr(0, conteo.find(" ")));
+		conteo.erase(0, conteo.rfind(" ")+1);
+    }
+	for(std::string x : resultado){
+		std::cout<<x<<std::endl;
 	}
 	for(char x : partidos){
 		int contador = 0;
@@ -165,7 +191,15 @@ std::string Empadronador::contarVotos(FS* fs, Usuario* user){
 				contador++;
 			}
 		}
-		votos += "Partido #"+std::to_string(x)+" = "+std::to_string(contador)+" votos\n";
+		std::string partidoActual = "";
+		for(int i = 1; i < resultado.size(); i+=2){
+			std::string aux = resultado[i];
+			if(aux[0] == x){
+				partidoActual = resultado[i-1];
+				break;
+			}
+		}
+		votos += partidoActual+" = "+std::to_string(contador)+" votos\n";
 	}
 	return votos;
 }

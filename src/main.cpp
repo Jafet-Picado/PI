@@ -18,11 +18,11 @@ int main() {
   fs->crear("votos.txt",user);
   Empadronador empadronador;
   empadronador.cargarPadron(fs, user);
-  std::vector<int> votos = {1,2,1,2,1,2,1,2,1,2};
-  empadronador.subirVotos(fs,votos,user);
-  std::cout<<empadronador.contarVotos(fs, user)<<std::endl;
+  empadronador.simularVotos(fs, user);
+  fs->imprimirUnidad(1);
+  //std::cout<<empadronador.contarVotos(fs, user)<<std::endl;
   //fs->imprimirUnidad();
-  //std::cout<<fs->leerPadron("CA-Paraiso.txt",user)<<std::endl;
+  std::cout<<fs->leerPadron("CA-Paraiso.txt",user)<<std::endl;
 }
 
 /*  IMPRIMIR UNIDAD al final
