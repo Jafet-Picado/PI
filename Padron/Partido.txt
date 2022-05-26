@@ -1,5 +1,5 @@
-PLN 1
-PAC 2
-PUSC 3
-RN 4
-FA 5
+Partido_Liberacion_Nacional 1
+Partido_Accion_Ciudadana 2
+Partido_Union_Social_Cristiana 3
+Restauracion_Nacional 4
+Frente_Amplio 5

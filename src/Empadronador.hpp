@@ -163,7 +163,6 @@ void Empadronador::subirVotos(FS *fs, std::vector<int> votos, Usuario* user) {
 std::string Empadronador::contarVotos(FS* fs, Usuario* user){
 	std::string votos = "";
 	std::string aux = fs->leer("votos.txt",user);
-	
 	std::vector<char> partidos;
 	for(char x : aux){
 		if (!(std::find(partidos.begin(), partidos.end(), x) != partidos.end())) {
@@ -172,18 +171,19 @@ std::string Empadronador::contarVotos(FS* fs, Usuario* user){
 			}
 		}
 	}
-	std::string conteo = fs->leer("Partido.txt", user);
-	std::vector<std::string> resultado;
-	std::cout<<conteo<<std::endl;
-	std::string delim = " ";
-    while (!conteo.empty()) {
-		std::cout<<"Entra"<<std::endl;
-        resultado.push_back(conteo.substr(0, conteo.find(" ")));
-		conteo.erase(0, conteo.rfind(" ")+1);
+	std::string conteo = fs->leer("Partidos.txt", user);
+	int posInit = 0;
+    int posFound = 0;
+    std::string splitted;
+    std::vector<std::string> resultado;
+    
+    while(posFound >= 0){
+        posFound = conteo.find(" ", posInit);
+        splitted = conteo.substr(posInit, posFound - posInit);
+        posInit = posFound + 1;
+        resultado.push_back(splitted);
     }
-	for(std::string x : resultado){
-		std::cout<<x<<std::endl;
-	}
+	
 	for(char x : partidos){
 		int contador = 0;
 		for(char y : aux){
