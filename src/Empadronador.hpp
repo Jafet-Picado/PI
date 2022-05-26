@@ -101,7 +101,7 @@ void Empadronador::simularVotos(FS *fs, Usuario *user) {
 			archivo.close();
 		// De aquí en adelante simula que llegaron N votos en un paquete para subir a la unidad
 			std::vector<int> votos;
-			for(int i = 0; i < 15; i++){
+			for(int i = 0; i < contador; i++){
 				votos.push_back(1+rand()%5);
 			}
 			subirVotos(fs, votos, user);
