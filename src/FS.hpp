@@ -222,6 +222,7 @@ std::string FS::leer(std::string nombre, Usuario *user) {
     if(this->abrir(nombre, user)){
       int posicion;
       bool encontroDirectorio;
+      // Buscamos el bloque donde inicia el directorio
       for (int index = 0; index < directorio.size(); ++index) {
         if (directorio[index].nombre == nombre) {
           posicion = directorio[index].bloque;
@@ -229,18 +230,21 @@ std::string FS::leer(std::string nombre, Usuario *user) {
           break;
         }
       }
+      // Si encontramos el Directorio
       if (encontroDirectorio) {
         int posicionAux = posicion;
+        // Mientras no encontremos el final del directorio "x"
         while (posicionAux != -1) {
-
           int posicionUnidad = posicionAux *SIZE_BLOQUE;
-          int indexI = 0; int indexJ = 0;    
+          int indexI = 0; int indexJ = 0; 
+          // Buscamos un indice que nos va a indicar la posicion en la matriz  
           while (posicionUnidad >= SIZE_UNIDAD) {
             posicionUnidad = posicionUnidad - SIZE_UNIDAD;
             indexI++;
           }
           indexJ = posicionUnidad;
           int finBloque = indexJ + SIZE_BLOQUE;
+          //Aqui guardamos los datos que estan en la unidad
           while (indexJ < finBloque) {
             if (unidad[indexI][indexJ] == '-') {
               break;
