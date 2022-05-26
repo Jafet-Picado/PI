@@ -29,11 +29,6 @@ struct entradaDirectorio{
   bool isDirectory = false;
 };
 
-struct voto{
-  std::string ID;
-  int voto;
-};
-
 class FS{
   // vars
  private:
@@ -436,8 +431,8 @@ std::string FS::leerPadron(std::string nombre, Usuario* user){
     std::string lectura = "";
     //Recorro todos los bloques utilizados por el archivo
     for(int bloque : bloquesUsados){
-        int inicioBloque = bloque*128;
-        int finalBloque = ((bloque+1)*128);
+        int inicioBloque = bloque*SIZE_BLOQUE;
+        int finalBloque = ((bloque+1)*SIZE_BLOQUE);
         int fila = 0;
         int columna = 0;
         int contador = 0;
