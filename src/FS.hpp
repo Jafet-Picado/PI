@@ -221,31 +221,33 @@ std::string FS::leer(std::string nombre, Usuario *user) {
   if (verificador->verificarPermisos(user, "0700", 2)) {
     if(this->abrir(nombre, user)){
       int posicion;
-      int encontroDirectorio = 0;
+      bool encontroDirectorio;
       for (int index = 0; index < directorio.size(); ++index) {
         if (directorio[index].nombre == nombre) {
           posicion = directorio[index].bloque;
-          encontroDirectorio = 1;
+          encontroDirectorio = true;
           break;
         }
       }
-      if (encontroDirectorio == 1) {
+      if (encontroDirectorio) {
         int posicionAux = posicion;
         while (posicionAux != -1) {
-          int posicionUnidad = posicionAux;
-          int indexI = 0;
-          int indexJ = 0;
-          while (posicionUnidad != 0) {
-            if (posicionUnidad>=SIZE_UNIDAD) {
-              indexI++;
-              posicionUnidad = posicionUnidad - SIZE_UNIDAD;
-            }
-            if (posicionUnidad<SIZE_UNIDAD) {
-              indexJ++;
-              posicionUnidad = posicionUnidad - 1;
+
+          int posicionUnidad = posicionAux *SIZE_BLOQUE;
+          int indexI = 0; int indexJ = 0;    
+          while (posicionUnidad >= SIZE_UNIDAD) {
+            posicionUnidad = posicionUnidad - SIZE_UNIDAD;
+            indexI++;
+          }
+          indexJ = posicionUnidad;
+          int finBloque = indexJ + SIZE_BLOQUE;
+          while (indexJ < finBloque) {
+            if (unidad[indexI][indexJ] == '-') {
+              break;
+            }else{
+              to_return += unidad[indexI][indexJ++];
             }
           }
-          to_return += unidad[indexI][indexJ];
           posicion = posicionAux;
           posicionAux = FAT[posicion];
         }
@@ -339,54 +341,51 @@ void FS::imprimirUnidad(int tipo = 0){ // Esto hace que tipo sea opcional
 }
 
 void FS::eliminar(std::string nombre, Usuario *user) {
-  //if(user->getPermisos() == 4){
-    int posicion = 0;
-    int ultimaPosicion = 0;
-    for (int index = 0; index < directorio.size(); index++) {
+  std::string to_return;
+  if (verificador->verificarPermisos(user, "0700", 2)) {
+    this->cerrar(nombre, user);
+    int posicion;
+    bool encontroDirectorio;
+    for (int index = 0; index < directorio.size(); ++index) {
       if (directorio[index].nombre == nombre) {
-        // Borrado de directorio
         posicion = directorio[index].bloque;
-        ultimaPosicion = directorio[index].puntero;
+        encontroDirectorio = true;
         directorio[index] = directorio[directorio.size()-1];
         directorio.resize(directorio.size()-1);
+        break;
       }
     }
-    //Reseteo de espacio en tabla FAT tras liberar directorio
-    int posicionAux = posicion;
-    while (FAT[posicion] != -1) {
-      posicionAux = FAT[posicion];
-      // -2 Para posicion libre
-      int posicionUnidad = posicion;
-      int indexI = 0;
-      int indexJ = 0;
-      while (posicionUnidad != 0) {
-        if (posicionUnidad>=SIZE_UNIDAD) {
+    if (encontroDirectorio) {
+      int posicionAux = posicion;
+      while (posicionAux != -1) {
+
+        int posicionUnidad = posicionAux *SIZE_BLOQUE;
+        int indexI = 0; int indexJ = 0;    
+        while (posicionUnidad >= SIZE_UNIDAD) {
+          posicionUnidad = posicionUnidad - SIZE_UNIDAD;
           indexI++;
-          posicionUnidad -= SIZE_UNIDAD;
-        } else {
-          indexJ++;
-          posicionUnidad--;
         }
+        indexJ = posicionUnidad;
+        int finBloque = indexJ + SIZE_BLOQUE;
+        while (indexJ < finBloque) {
+          if (unidad[indexI][indexJ] == '-') {
+            break;
+          }else{
+            unidad[indexI][indexJ++] = '-';
+          }
+        }
+        posicion = posicionAux;
+        posicionAux = FAT[posicion];
+        FAT[posicion] = -2;
       }
-      unidad[indexI][indexJ] = '-';
-      FAT[posicion] = -2;
-      posicion = posicionAux;
+    }else{
+      std::cerr<<"\033[31mError, el directorio "<< nombre << " no existe\n";
     }
-    FAT[posicion] = -2;
-    int posicionUnidad = posicion;
-    int indexI=0; int indexJ=0;
-    while (posicionUnidad != 0) {
-        if (posicionUnidad>=SIZE_UNIDAD) {
-          indexI++;
-          posicionUnidad -= SIZE_UNIDAD;
-        } else {
-          indexJ++;
-          posicionUnidad--;
-        }
-    }
-    unidad[indexI][indexJ] = '-';
-    //Borrado de unidad de caracteres o string?
-  //}
+    
+  } else {
+    std::cout << "No tiene permisos para esta acción" << std::endl;
+  }
+  //return to_return;
 }
 
 void FS::cerrar(std::string nombre, Usuario *user) {
